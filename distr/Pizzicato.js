@@ -2123,6 +2123,64 @@
         this.reverbNode.buffer = impulse;
     }
 
+    Pizzicato.Effects.Bitcrusher = function(options) {
+        const context = Pz.context;
+
+        this.inputNode = context.createGain();
+        this.outputNode = context.createGain();
+
+        this.bits = options.bits || 4;
+        this.frequency = options.frequency || 44100;
+
+        this.crusherNode = context.createScriptProcessor(4096, 1, 1);
+
+        const self = this;
+        this.crusherNode.onaudioprocess = function (event) {
+            const inputBuffer = event.inputBuffer;
+            const outputBuffer = event.outputBuffer;
+            const bitStep = Math.pow(0.5, self.bits - 1);
+            const freqStep = self.frequency / context.sampleRate;
+
+            for (let channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+                const input = inputBuffer.getChannelData(channel);
+                const output = outputBuffer.getChannelData(channel);
+                for (let i = 0; i < input.length; i++) {
+                    if (i % freqStep === 0) output[i] = Math.floor(input[i] / bitStep) * bitStep;
+                    else output[i] = output[i - 1];
+                }
+            }
+        };
+
+        this.inputNode.connect(this.crusherNode);
+        this.crusherNode.connect(this.outputNode);
+        this.connect = function (destination) {
+            this.outputNode.connect(destination);
+        };
+        this.disconnect = function () {
+            this.outputNode.disconnect();
+        };
+    };
+
+    Pizzicato.Effects.Bitcrusher.prototype = {
+        constructor: Pizzicato.Effects.Bitcrusher,
+        setBits: function(bits) {
+            if (bits >= 1 && bits <= 16) {
+                this.bits = bits;
+            }
+        },
+        getBits: function() {
+            return this.bits
+        },
+        setFrequency: function(freq) {
+            if (freq > 0) {
+                this.frequency = freq;
+            }
+        },
+        getFrequency: function() {
+            return this.frequency
+        }
+    }
+
     /**
      * A Three-band equalizer with gain adjustments for low, mid, and high frequencies
      */
@@ -2980,8 +3038,6 @@
             }
         }
     });
-
-
 
     return Pizzicato;
 })();
