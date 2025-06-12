@@ -1606,6 +1606,82 @@
 		}
 	
 	});
+
+  Pizzicato.Effects.Panner3D = function(options) {
+	  this.options = {};
+	  options = options || this.options;
+
+	  const defaults = {
+	  	x: 0,
+	  	y: 0,
+	  	z: 0,
+	  	panningModel: 'HRTF',
+	  	distanceModel: 'inverse',
+	  	refDistance: 1,
+	  	maxDistance: 10000,
+	  	rolloffFactor: 1
+	  };
+
+	  this.inputNode = Pizzicato.context.createGain();
+	  this.outputNode = Pizzicato.context.createGain();
+
+	  if (!Pizzicato.context.createPanner) {
+	  	console.warn('Your browser does not support 3D PannerNode.');
+	  	this.inputNode.connect(this.outputNode);
+	  	return;
+	  }
+
+	  this.pannerNode = Pizzicato.context.createPanner();
+	  this.pannerNode.panningModel = defaults.panningModel;
+	  this.pannerNode.distanceModel = defaults.distanceModel;
+	  this.pannerNode.refDistance = defaults.refDistance;
+	  this.pannerNode.maxDistance = defaults.maxDistance;
+	  this.pannerNode.rolloffFactor = defaults.rolloffFactor;
+
+	  this.inputNode.connect(this.pannerNode);
+	  this.pannerNode.connect(this.outputNode);
+
+	  for (let key in defaults) {
+	  	this.options[key] = (options[key] !== undefined) ? options[key] : defaults[key];
+	  }
+
+	  this.pannerNode.setPosition(this.options.x, this.options.y, this.options.z);
+  };
+
+  Pizzicato.Effects.Panner3D.prototype = Object.create(baseEffect, {
+    x: {
+      enumerable: true,
+      get: function() { return this.options.x; },
+      set: function(x) {
+        this.options.x = x;
+        this._updatePosition();
+      }
+    },
+    y: {
+      enumerable: true,
+		  get: function() { return this.options.y; },
+  		set: function(y) {
+  			this.options.y = y;
+  			this._updatePosition();
+  		}
+  	},
+  	z: {
+  		enumerable: true,
+  		get: function() { return this.options.z; },
+  		set: function(z) {
+  			this.options.z = z;
+  			this._updatePosition();
+  		}
+  	},
+  	_updatePosition: {
+  		value: function() {
+  			if (this.pannerNode && typeof this.pannerNode.setPosition === 'function') {
+  				this.pannerNode.setPosition(this.options.x, this.options.y, this.options.z);
+  			}
+  		}
+  	}
+  });
+
 	Pizzicato.Effects.StereoPanner = function(options) {
 	
 		this.options = {};
