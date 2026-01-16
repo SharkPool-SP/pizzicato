@@ -1,4 +1,4 @@
-(function() {
+(function(opt_AudioContext) {
     'use strict';
 
     var Pizzicato = {};
@@ -12,7 +12,7 @@
         throw new Error('No AudioContext found in this environment.');
     }
 
-    Pizzicato.context = new AudioContext();
+    Pizzicato.context = opt_AudioContext ?? new AudioContext();
 
     var masterGainNode = Pizzicato.context.createGain();
     masterGainNode.connect(Pizzicato.context.destination);
@@ -3040,4 +3040,4 @@
     });
 
     return Pizzicato;
-})();
+});
