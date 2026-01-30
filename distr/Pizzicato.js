@@ -1,4 +1,4 @@
-(function(opt_AudioContext) {
+var Pizzicato = (function(opt_AudioContext) {
     'use strict';
 
     var Pizzicato = {};
