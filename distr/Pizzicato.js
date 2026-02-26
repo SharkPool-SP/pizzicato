@@ -106,10 +106,14 @@ var Pizzicato = (function(opt_AudioContext) {
 
     audioNode.connect = function(node) {
         var endpoint = Pz.Util.isEffect(node) ? node.inputNode : node;
-        connect.call(this, endpoint);
+
+        var args = Array.prototype.slice.call(arguments);
+        args[0] = endpoint;
+
+        connect.apply(this, args);
+
         return node;
     };
-
     Object.defineProperty(Pizzicato, 'volume', {
         enumerable: true,
 
